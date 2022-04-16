@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { classNames } from "../../helpers/classNames";
 
 const colors: string[] = [
@@ -29,22 +30,27 @@ const breakpoints: number[] = [
 ];
 
 export const ColorResponsive = () => {
-  const [color, setColor] = useState('');
+  const debounceId = useRef(0);
+  const [color, setColor] = useState('bg-white-600');
+
+  const alteraCor = useCallback(() => {
+    const width = window.innerWidth;
+    const index = breakpoints.findIndex(breakpoint => width < breakpoint);
+    const breakpointIndex = index === -1 ? 0 : index;
+    setColor(colors[breakpointIndex]);
+  }, []);
 
   useEffect(() => {
-    const alteraCor = () => {
-      const width = window.innerWidth;
-      const index = breakpoints.findIndex(breakpoint => width < breakpoint);
-      const breakpointIndex = index === -1 ? 0 : index;
-      setColor(colors[breakpointIndex]);
+    const debounceColor = () => {
+      clearTimeout(debounceId.current);
+      debounceId.current = window.setTimeout(alteraCor, 500);
     }
-
-    alteraCor();
-    window.addEventListener('resize', alteraCor);
+    window.addEventListener('resize', debounceColor);
     return () => {
-      window.removeEventListener('resize', alteraCor);
+      window.removeEventListener('resize', debounceColor);
     }
-  }, []);
+  }, [alteraCor]);
+
 
   console.log('==== re-render')
   return (
