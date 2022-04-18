@@ -1,8 +1,14 @@
+import { useEffect, useState, useRef } from "react";
+import useDebounce from "../../hooks/useDebounce";
 import { useChat } from "../../contexts/chat.context";
 
 export const ChatHeader = () => {
-  const chat = useChat();
-  const contato = chat.participantes.find(p => !p.usuarioAtual);
+  const [ busca, setBusca] = useState('');
+  const debounceBuscaMensagem = useDebounce(busca, 1000);
+  const { setBuscaMensagem, participantes } = useChat();
+  const contato = participantes.find((p) => !p.usuarioAtual);
+  
+  useEffect(() => { setBuscaMensagem(busca) }, [debounceBuscaMensagem]);
 
   return (
     <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
@@ -39,11 +45,11 @@ export const ChatHeader = () => {
             type="text"
             placeholder="Buscar mensagem"
             className="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3"
-            value={ chat.buscaMensagem }
-            onChange={ event => chat.setBuscaMensagem(event?.target.value) }
+            value={ busca}
+            onChange={ (event) => setBusca(event.target.value) }
           />
         </div>
       </div>
     </div>
-  )
+  );
 };
